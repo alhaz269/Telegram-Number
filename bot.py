@@ -16,7 +16,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "👋 স্বাগতম! আপনি ১০০ নাম্বার বা 📬 Gmail দিতে পারেন ?\n\n"
         "📱 নাম্বার দিলে ➕ বা 🔗 বাটন আসবে\n"
         "📬 Gmail দিলে 📧 বাটন আসবে\n\n"
-        "✅ একসাথে ১০০ টি নাম্বার দিন "
+        "✅ একসাথে ১০০ টি নাম্বার দিন😎"
     )
     await update.message.reply_text(welcome_text)
 
@@ -36,26 +36,32 @@ async def input_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if "@" in text:  # Gmail ইনপুট
         user_gmails[user_id] = text
+        await update.message.reply_text("✅ আপনি Gmail ইনপুট দিয়েছেন।")
+
+        keyboard = [
+            [InlineKeyboardButton("📧 Gmail Variations", callback_data="gmail")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text("নিচের অপশন থেকে সিলেক্ট করুন:", reply_markup=reply_markup)
+
     else:  # নাম্বার ইনপুট
         numbers = [int(num) for num in text.replace(',', ' ').split() if num.isdigit()]
         if not numbers:
-            await update.message.reply_text("সঠিক নাম্বার দিন।")
+            await update.message.reply_text("❌ সঠিক নাম্বার দিন।")
             return
-        user_numbers[user_id] = numbers
 
-    num_count = len(user_numbers.get(user_id, []))
-    gmail_count = 1 if user_gmails.get(user_id) else 0
-    await update.message.reply_text(
-        f"আপনি {num_count} নাম্বার ইনপুট দিয়েছেন এবং {gmail_count} Gmail ইনপুট দিয়েছেন।"
-    )
+        # নতুন নাম্বার দিলে আগেরগুলা clear হয়ে শুধু নতুন ইনপুট সেভ হবে
+        user_numbers[user_id] = numbers  
 
-    keyboard = [
-        [InlineKeyboardButton("➕ Add Plus", callback_data="plus_all")],
-        [InlineKeyboardButton("🔗 Telegram Link", callback_data="link_all")],
-        [InlineKeyboardButton("📧 Gmail Variations", callback_data="gmail")]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("নিচের অপশনগুলো থেকে সিলেক্ট করুন:", reply_markup=reply_markup)
+        num_count = len(numbers)
+        await update.message.reply_text(f"✅ আপনি {num_count} নাম্বার দিয়েছেন।")
+
+        keyboard = [
+            [InlineKeyboardButton("➕ Add Plus", callback_data="plus_all")],
+            [InlineKeyboardButton("🔗 Telegram Link", callback_data="link_all")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text("নিচের অপশন থেকে সিলেক্ট করুন:", reply_markup=reply_markup)
 
 # বাটন হ্যান্ডলার
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
